@@ -15,3 +15,5 @@ export const generateToken = async (uniqueId, role) => {
   );
   return token;
 };
+
+export const matchToken = async () => {};

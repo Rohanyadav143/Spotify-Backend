@@ -1,6 +1,9 @@
 import userModel from "../models/user.model.js";
 import { generateToken } from "../middlewares/token.middleware.js";
-import { hashPassword } from "../middlewares/hashPassword.middleware.js";
+import {
+  hashPassword,
+  passwordChecker,
+} from "../middlewares/hashPassword.middleware.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -53,6 +56,44 @@ export const registerUser = async (req, res) => {
   }
 };
 
+export const loginUser = async (req, res) => {
+  try {
+    const { userName, email, password } = req.body;
 
+    const user = await userModel.findOne({
+      $or: [{ userName }, { email }],
+    });
 
+    if (!user) {
+      return res.status(401).send({
+        message: "User not exist",
+      });
+    }
+    console.log(user.password)
+    const isPasswordCorrect = await passwordChecker(password, user.password);
 
+    if (!isPasswordCorrect) {
+      return res.status(401).send({
+        message: "Entered password is wrong",
+      });
+    }
+
+    const token = await generateToken(user._id, user.role);
+
+    res.cookie("token", token);
+
+    res.status(200).send({
+      message: "User login successfully",
+      user: {
+        id: user._id,
+        userName: user.userName,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    res.status(401).send({
+      error: "User login error",
+    });
+  }
+};
