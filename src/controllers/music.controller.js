@@ -22,7 +22,7 @@ export const createMusic = async (req, res) => {
       artist: req.user.id,
     });
 
-    res.status(201).send({
+    res.status(201).json({
       message: "Music created successfully",
       music: {
         id: music._id,
@@ -48,7 +48,7 @@ export const createAlbum = async (req, res) => {
       musics: musics,
     });
 
-    res.status(201).send({
+    res.status(201).json({
       message: "Album created successfully",
       album: {
         id: album._id,
@@ -62,4 +62,44 @@ export const createAlbum = async (req, res) => {
       message: error.message,
     });
   }
+};
+
+export const getAllMusics = async (req, res) => {
+  try {
+    const musics = await musicModel
+      .find()
+      .limit(20)
+      .populate("artist", "userName email");
+    res.status(200).json({
+      message: "Musics fetched successfully",
+      musics: musics,
+    });
+  } catch (error) {
+    res.status(401).send({
+      error: "Music fetched error",
+    });
+  }
+};
+
+export const getAllAlbum = async (req, res) => {
+  const album = await albumModel
+    .find()
+    .select("title artist")
+    .populate("artist", "username email");
+  res.status(200).json({
+    message: "Album fetched successfully",
+    album: album,
+  });
+};
+
+export const getAlbumById = async (req, res) => {
+  const albumId = req.params.albumId;
+  const album = await albumModel
+    .findById(albumId)
+    .populate("artist", "userName email");
+
+  return res.status(200).json({
+    message: "Album fetched successfully",
+    album: album,
+  });
 };
