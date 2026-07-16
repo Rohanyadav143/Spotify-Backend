@@ -16,4 +16,7 @@ export const generateToken = async (uniqueId, role) => {
   return token;
 };
 
-export const matchToken = async () => {};
+export const verifyToken = async (token) => {
+  const data = await jwt.verify(token, key);
+  return data;
+};
