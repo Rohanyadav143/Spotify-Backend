@@ -1,25 +1,10 @@
-import { verifyToken } from "../middlewares/token.middleware.js";
+import { verifyToken } from "../utils/token.util.js";
 import musicModel from "../models/music.model.js";
+import albumModel from "../models/album.model.js";
 import { uploadFile } from "../services/storage.service.js";
 
 export const createMusic = async (req, res) => {
   try {
-    const token = req.cookies?.token;
-
-    if (!token) {
-      return res.status(401).send({
-        message: "Token not found",
-      });
-    }
-
-    const decoded = await verifyToken(token);
-
-    if (decoded.role !== "artist") {
-      return res.status(403).send({
-        message: "Not authorize to access music creation",
-      });
-    }
-
     if (!req.file) {
       return res.status(400).json({
         message: "Music file is required",
@@ -34,7 +19,7 @@ export const createMusic = async (req, res) => {
     const music = await musicModel.create({
       url: result.url,
       title,
-      artist: decoded.id,
+      artist: req.user.id,
     });
 
     res.status(201).send({
@@ -47,7 +32,32 @@ export const createMusic = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export const createAlbum = async (req, res) => {
+  try {
+    const { title, musics } = req.body;
+
+    const album = await albumModel.create({
+      title,
+      artist: req.user.id,
+      musics: musics,
+    });
+
+    res.status(201).send({
+      message: "Album created successfully",
+      album: {
+        id: album._id,
+        title: album.title,
+        artist: album.artist,
+        musics: album.musics,
+      },
+    });
+  } catch (error) {
     return res.status(500).json({
       message: error.message,
     });

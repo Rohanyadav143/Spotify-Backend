@@ -1,9 +1,6 @@
 import userModel from "../models/user.model.js";
-import { generateToken } from "../middlewares/token.middleware.js";
-import {
-  hashPassword,
-  passwordChecker,
-} from "../middlewares/hashPassword.middleware.js";
+import { generateToken } from "../utils/token.util.js";
+import { hashPassword, passwordChecker } from "../utils/hashPassword.util.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -69,7 +66,7 @@ export const loginUser = async (req, res) => {
         message: "User not exist",
       });
     }
-    console.log(user.password)
+    console.log(user.password);
     const isPasswordCorrect = await passwordChecker(password, user.password);
 
     if (!isPasswordCorrect) {
@@ -97,4 +94,3 @@ export const loginUser = async (req, res) => {
     });
   }
 };
-
